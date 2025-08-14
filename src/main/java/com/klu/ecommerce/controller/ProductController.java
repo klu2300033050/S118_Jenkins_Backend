@@ -12,7 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,15 +32,15 @@ public class ProductController {
     // 📌 Upload product with image
     @PostMapping("/upload")
     public ResponseEntity<String> uploadProductImage(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("name") String name,
-            @RequestParam("category") String category,
-            @RequestParam("price") double price) {
+            @RequestParam MultipartFile file,
+            @RequestParam String name,
+            @RequestParam String category,
+            @RequestParam double price) {
 
         try {
             // Generate unique file name
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+            Path filePath = Path.of(UPLOAD_DIR + fileName);
 
             // Ensure directory exists
             Files.createDirectories(filePath.getParent());
@@ -76,7 +77,7 @@ public class ProductController {
     @GetMapping("/images/{fileName}")
     public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
         try {
-            Path imagePath = Paths.get(UPLOAD_DIR).resolve(fileName).normalize();
+            Path imagePath = Path.of(UPLOAD_DIR).resolve(fileName).normalize();
             Resource resource = new UrlResource(imagePath.toUri());
 
             if (resource.exists() || resource.isReadable()) {

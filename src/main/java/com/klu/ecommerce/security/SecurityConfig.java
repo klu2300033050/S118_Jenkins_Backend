@@ -21,19 +21,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()  // 🔹 Disable CSRF for API requests
-            .authorizeHttpRequests()
-            .antMatchers("/auth/**", "/api/products/**", "/api/payments/**").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .csrf(csrf -> csrf.disable())  // 🔹 Disable CSRF for API requests
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/auth/**", "/api/products/**", "/api/payments/**").permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider() {
+    AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
@@ -41,12 +40,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
